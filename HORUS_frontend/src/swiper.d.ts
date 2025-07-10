@@ -1,0 +1,25 @@
+// Type declarations for Swiper CSS modules
+declare module 'swiper/css';
+declare module 'swiper/css/navigation';
+declare module 'swiper/css/pagination';
+declare module 'swiper/css/scrollbar';
+declare module 'swiper/css/autoplay';
+declare module 'swiper/css/effect-fade';
+declare module 'swiper/css/effect-cube';
+declare module 'swiper/css/effect-flip';
+declare module 'swiper/css/effect-coverflow';
+declare module 'swiper/css/effect-cards';
+declare module 'swiper/css/thumbs';
+declare module 'swiper/css/free-mode';
+declare module 'swiper/css/grid';
+declare module 'swiper/css/manipulation';
+declare module 'swiper/css/zoom';
+declare module 'swiper/css/lazy';
+declare module 'swiper/css/keyboard';
+declare module 'swiper/css/mousewheel';
+declare module 'swiper/css/history';
+declare module 'swiper/css/hash-navigation';
+declare module 'swiper/css/a11y';
+declare module 'swiper/css/controller';
+declare module 'swiper/css/parallax';
+declare module 'swiper/css/virtual';

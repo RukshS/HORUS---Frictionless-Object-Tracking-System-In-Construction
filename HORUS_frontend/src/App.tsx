@@ -1,0 +1,35 @@
+import { useState } from 'react';
+import './App.css';
+import Landing from './components/Landing/Landing'; // Import the LandingPage
+import UserDashboard from './components/Dashboard/UserDashboard'; // Import the UserDashboard
+import AuthService from './services/AuthService2'; // Import AuthService
+
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(AuthService.isAuthenticated());
+
+  const handleAuthStateChange = (authState: boolean) => {
+    setIsAuthenticated(authState);
+  };
+
+  const handleLogout = () => {
+    AuthService.logout();
+    setIsAuthenticated(false);
+    console.log('User logged out successfully');
+  };
+
+  return (
+    <>
+      {/* Show Dashboard if user is authenticated */}
+      {isAuthenticated ? (
+        <UserDashboard onLogout={handleLogout} />
+      ) : (
+        <Landing 
+          isAuthenticated={isAuthenticated}
+          onAuthStateChange={handleAuthStateChange}
+        />
+      )}
+    </>
+  );
+}
+
+export default App;
