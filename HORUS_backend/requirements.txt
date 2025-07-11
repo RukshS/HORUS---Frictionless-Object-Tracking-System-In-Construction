@@ -1,5 +1,5 @@
 # Editable install with no version control (aispace2==0.8.11)
--e d:\pen\semester 3\modern approach to artificial intelligence\search project\aispace2-0.8.11\aispace2-0.8.11
+# -e d:\pen\semester 3\modern approach to artificial intelligence\search project\aispace2-0.8.11\aispace2-0.8.11
 annotated-types==0.7.0
 anyio==4.7.0
 argon2-cffi==23.1.0
@@ -105,8 +105,8 @@ python-json-logger==2.0.7
 python-multipart==0.0.20
 python-slugify==8.0.4
 pytz==2025.2
-pywin32==308
-pywinpty==2.0.14
+# pywin32==308
+# pywinpty==2.0.14
 PyYAML==6.0.2
 pyzmq==26.2.0
 referencing==0.35.1
@@ -148,3 +148,40 @@ websocket-client==1.8.0
 websockets==15.0.1
 widgetsnbextension==4.0.13
 yapf==0.43.0
+numpy
+Cython
+h5py
+Pillow
+six
+scipy
+opencv-python
+matplotlib
+tb-nightly
+future
+yacs
+gdown
+flake8
+yapf
+isort==4.3.21
+imageio
+chardet
+# Export --------------------------------------
+# onnx
+# onnx-simplified
+# openvino-dev
+# openvino2tensorflow
+# tensorflow
+# tensorflow_datasets
+torch>=2.6.0
+torchvision>=0.21.0
+numpy
+opencv-python
+Pillow
+scipy
+scikit-learn
+yacs
+tqdm
+matplotlib
+pandas
+h5py
+tensorboard
