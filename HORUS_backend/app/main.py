@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from contextlib import asynccontextmanager
 from app.database import init_db
 import app.api.routes.auth as auth
+from app.api.routes.detection import router as detection_router
 
 
 # Define lifespan context manager
@@ -49,3 +50,5 @@ async def root():
 
 # To run this app (from the HORUS_Signup directory):
 # uvicorn backend.main:app --reload --port 8000
+
+app.include_router(detection_router, prefix="/api", tags=["Detection"])
