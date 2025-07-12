@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from contextlib import asynccontextmanager
 from app.database import init_db
 import app.api.routes.auth as auth
+import app.api.routes.face_recognition as face_recognition
 
 
 # Define lifespan context manager
@@ -30,7 +31,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/signin")
 origins = [
     "http://localhost:5173", # Assuming Vite dev server runs here
     "http://127.0.0.1:5173",
-    # Add your production frontend URL here
+    # Add production frontend URL here
 ]
 
 app.add_middleware(
@@ -42,10 +43,10 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(face_recognition.router)
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to Horus!"}
 
-# To run this app (from the HORUS_Signup directory):
-# uvicorn backend.main:app --reload --port 8000
+
