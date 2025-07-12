@@ -77,16 +77,15 @@ export default function Functionality() {
             modules={[Navigation, Autoplay]}
             spaceBetween={20}
             slidesPerView={1}
-            centeredSlides={true}
             autoplay={{
-              delay: 1000,
+              delay: 0,
               disableOnInteraction: false,
-              pauseOnMouseEnter: true,
-              reverseDirection: false,
+              pauseOnMouseEnter: false,
+              waitForTransition: false,
             }}
             loop={true}
-            loopAdditionalSlides={2}
-            speed={800}
+            speed={3000}
+            allowTouchMove={false}
             navigation={{
               nextEl: ".custom-next",
               prevEl: ".custom-prev",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AuthService from '../../services/AuthService';
 import UpdateForm from '../UpdateForm/UpdateForm';
+import FaceRecognitionDashboard from '../FaceRecognition/FaceRecognitionDashboard';
 import './UserDashboard.css';
 
 interface UserProfile {
@@ -21,6 +22,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
   const [error, setError] = useState<string | null>(null);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'dashboard' | 'face-recognition' | 'workforce-tracking' | 'asset-tracking'>('dashboard');
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -126,17 +128,33 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
         </div>
         
         <nav className="nav-menu">
-          <div className="nav-item active">
+          <div 
+            className={`nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setCurrentView('dashboard')}
+          >
             <span className="nav-icon">🏠</span>
             <span className="nav-text">Home</span>
           </div>
-          <div className="nav-item">
+          <div 
+            className={`nav-item ${currentView === 'asset-tracking' ? 'active' : ''}`}
+            onClick={() => setCurrentView('asset-tracking')}
+          >
             <span className="nav-icon">📍</span>
             <span className="nav-text">Asset Tracking</span>
           </div>
-          <div className="nav-item">
+          <div 
+            className={`nav-item ${currentView === 'workforce-tracking' ? 'active' : ''}`}
+            onClick={() => setCurrentView('workforce-tracking')}
+          >
             <span className="nav-icon">👥</span>
             <span className="nav-text">Work Force Safety</span>
+          </div>
+          <div 
+            className={`nav-item ${currentView === 'face-recognition' ? 'active' : ''}`}
+            onClick={() => setCurrentView('face-recognition')}
+          >
+            <span className="nav-icon">🎭</span>
+            <span className="nav-text">Face Recognition</span>
           </div>
         </nav>
       </div>
@@ -159,53 +177,73 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ onLogout }) => {
         </div>
 
         <div className="content-wrapper">
-          <div className="company-details-section">
-            <div className="company-header">
-              <h2><span className="company-text">Company</span> Details</h2>
-            </div>
+          {currentView === 'dashboard' && (
+            <div className="company-details-section">
+              <div className="company-header">
+                <h2><span className="company-text">Company</span> Details</h2>
+              </div>
 
-            <div className="company-content">
-              <div className="profile-box company-info">
-                <div className="info-group">
-                  <div className="info-item">
-                    <label>Company name:</label>
-                    <span>{userProfile.company_name}</span>
+              <div className="company-content">
+                <div className="profile-box company-info">
+                  <div className="info-group">
+                    <div className="info-item">
+                      <label>Company name:</label>
+                      <span>{userProfile.company_name}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Admin:</label>
+                      <span>{userProfile.admin_name}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Location:</label>
+                      <span>{userProfile.location || 'Not specified'}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Email:</label>
+                      <span>{userProfile.email}</span>
+                    </div>
                   </div>
-                  <div className="info-item">
-                    <label>Admin:</label>
-                    <span>{userProfile.admin_name}</span>
+                </div>
+
+                <div className="company-avatar">
+                  <div className="avatar-circle">
+                    <span className="avatar-initials">
+                      {userProfile.company_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </span>
                   </div>
-                  <div className="info-item">
-                    <label>Location:</label>
-                    <span>{userProfile.location || 'Not specified'}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Email:</label>
-                    <span>{userProfile.email}</span>
+                </div>
+
+                <div className="profile-box emergency-contact">
+                  <h3>Emergency Contact Details :</h3>
+                  <div className="contact-info">
+                    <span>{userProfile.contact_no}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="company-avatar">
-                <div className="avatar-circle">
-                  <span className="avatar-initials">
-                    {userProfile.company_name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                  </span>
-                </div>
-              </div>
-
-              <div className="profile-box emergency-contact">
-                <h3>Emergency Contact Details :</h3>
-                <div className="contact-info">
-                  <span>{userProfile.contact_no}</span>
-                </div>
+              <div className="update-section">
+                <button onClick={handleOpenUpdateForm} className="update-btn">Update</button>
               </div>
             </div>
+          )}
 
-            <div className="update-section">
-              <button onClick={handleOpenUpdateForm} className="update-btn">Update</button>
+          {currentView === 'face-recognition' && (
+            <FaceRecognitionDashboard />
+          )}
+
+          {currentView === 'asset-tracking' && (
+            <div className="coming-soon">
+              <h2>Asset Tracking</h2>
+              <p>This feature is coming soon!</p>
             </div>
-          </div>
+          )}
+
+          {currentView === 'workforce-tracking' && (
+            <div className="coming-soon">
+              <h2>Workforce Safety Tracking</h2>
+              <p>This feature is coming soon!</p>
+            </div>
+          )}
         </div>
 
         {showUpdateForm && userProfile && (
