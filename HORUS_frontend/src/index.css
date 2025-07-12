@@ -4,9 +4,10 @@
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  background-image: url('./assets/i111i.png');
+  background-image: url('./assets/background.png');
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   filter: brightness(100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
