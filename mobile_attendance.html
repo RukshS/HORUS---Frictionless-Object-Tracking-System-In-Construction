@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HORUS Mobile Attendance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 15px;
+        }
+        
+        .setup-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .status.connected {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .status.disconnected {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+        }
+        
+        .status.connecting {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 25px 0;
+        }
+        
+        .controls.streaming {
+            grid-template-columns: 1fr;
+        }
+        
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        button:not(:disabled):active {
+            transform: scale(0.95);
+        }
+        
+        .video-container {
+            position: relative;
+            margin: 25px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            min-height: 240px;
+        }
+        
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .streaming-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        .camera-controls {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .camera-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .results {
+            margin-top: 25px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+        
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-success {
+            background: linear-gradient(90deg, #d4edda, #c3e6cb);
+            border-left: 4px solid #28a745;
+        }
+        
+        .result-error {
+            background: linear-gradient(90deg, #f8d7da, #f5c6cb);
+            border-left: 4px solid #dc3545;
+        }
+        
+        .result-info {
+            background: linear-gradient(90deg, #d1ecf1, #bee5eb);
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .attendance-success {
+            background: linear-gradient(90deg, #d4edda, #c3e6cb);
+            border-left: 4px solid #28a745;
+            animation: highlight 2s ease;
+        }
+        
+        @keyframes highlight {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .no-results {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 HORUS Mobile</h1>
+            <p>Wireless Face Recognition Attendance</p>
+        </div>
+        
+        <div class="setup-section">
+            <h3>🔧 Server Configuration</h3>
+            <div class="input-group">
+                <label for="serverIp">Laptop Server IP Address:</label>
+                <input type="text" id="serverIp" placeholder="192.168.1.100" value="192.168.1.4">
+            </div>
+            <div class="input-group">
+                <label for="orgEmail">Organization Email:</label>
+                <input type="text" id="orgEmail" placeholder="company@example.com" value="test@company.com">
+            </div>
+        </div>
+        
+        <div id="connectionStatus" class="status disconnected">
+            📵 WebSocket: Disconnected
+        </div>
+        
+        <div class="controls" id="controlsGrid">
+            <button id="connectBtn" class="btn-primary">📡 Connect</button>
+            <button id="startCameraBtn" class="btn-success" disabled>📷 Camera</button>
+            <button id="startStreamBtn" class="btn-warning" disabled>▶️ Stream</button>
+            <button id="stopStreamBtn" class="btn-danger" disabled>⏹️ Stop</button>
+        </div>
+        
+        <div class="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <div id="streamingIndicator" class="streaming-indicator" style="display: none;">
+                🔴 LIVE STREAMING
+            </div>
+            <div class="camera-controls" style="display: none;" id="cameraControls">
+                <button id="switchCameraBtn" class="camera-btn">🔄</button>
+                <button id="flashBtn" class="camera-btn">💡</button>
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="margin: 15px 0 10px 0; color: #333;">📊 Attendance Results:</h3>
+            <div id="results" class="results">
+                <div class="no-results">Connect and start streaming to see attendance results</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class MobileAttendanceSystem {
+            constructor() {
+                this.initializeElements();
+                this.initializeState();
+                this.bindEvents();
+                this.detectBrowser();
+            }
+            
+            initializeElements() {
+                this.elements = {
+                    serverIp: document.getElementById('serverIp'),
+                    orgEmail: document.getElementById('orgEmail'),
+                    connectBtn: document.getElementById('connectBtn'),
+                    startCameraBtn: document.getElementById('startCameraBtn'),
+                    startStreamBtn: document.getElementById('startStreamBtn'),
+                    stopStreamBtn: document.getElementById('stopStreamBtn'),
+                    switchCameraBtn: document.getElementById('switchCameraBtn'),
+                    flashBtn: document.getElementById('flashBtn'),
+                    video: document.getElementById('video'),
+                    canvas: document.getElementById('canvas'),
+                    connectionStatus: document.getElementById('connectionStatus'),
+                    results: document.getElementById('results'),
+                    streamingIndicator: document.getElementById('streamingIndicator'),
+                    controlsGrid: document.getElementById('controlsGrid'),
+                    cameraControls: document.getElementById('cameraControls')
+                };
+            }
+            
+            initializeState() {
+                this.ws = null;
+                this.isConnected = false;
+                this.isStreaming = false;
+                this.streamInterval = null;
+                this.currentStream = null;
+                this.facingMode = 'user';
+                this.clientId = `mobile_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            }
+            
+            bindEvents() {
+                this.elements.connectBtn.addEventListener('click', () => this.connectWebSocket());
+                this.elements.startCameraBtn.addEventListener('click', () => this.startCamera());
+                this.elements.startStreamBtn.addEventListener('click', () => this.startStreaming());
+                this.elements.stopStreamBtn.addEventListener('click', () => this.stopStreaming());
+                this.elements.switchCameraBtn.addEventListener('click', () => this.switchCamera());
+                this.elements.flashBtn.addEventListener('click', () => this.toggleFlash());
+                
+                // Auto-update connection URL when inputs change
+                this.elements.serverIp.addEventListener('input', () => this.updateConnectionUrl());
+                this.elements.orgEmail.addEventListener('input', () => this.updateConnectionUrl());
+                
+                // Handle page visibility change
+                document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
+                
+                // Handle page unload
+                window.addEventListener('beforeunload', () => this.cleanup());
+            }
+            
+            detectBrowser() {
+                const userAgent = navigator.userAgent;
+                const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+                const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+                
+                if (isIOS && isSafari && location.protocol !== 'https:') {
+                    this.addResult('⚠️ Safari requires HTTPS for camera access. Consider using Chrome.', 'error');
+                }
+            }
+            
+            updateConnectionUrl() {
+                const serverIp = this.elements.serverIp.value.trim() || '192.168.1.100';
+                const orgEmail = this.elements.orgEmail.value.trim() || 'test@company.com';
+                this.wsUrl = `ws://${serverIp}:8000/ws/stream/${this.clientId}?org_email=${encodeURIComponent(orgEmail)}`;
+            }
+            
+            async connectWebSocket() {
+                this.updateConnectionUrl();
+                
+                this.updateStatus('connecting', '🔄 Connecting to server...');
+                
+                try {
+                    this.ws = new WebSocket(this.wsUrl);
+                    
+                    this.ws.onopen = () => {
+                        console.log('WebSocket connected');
+                        this.isConnected = true;
+                        this.updateUI();
+                        this.addResult('✅ Connected to HORUS server successfully!', 'success');
+                    };
+                    
+                    this.ws.onmessage = (event) => {
+                        try {
+                            const result = JSON.parse(event.data);
+                            this.handleWebSocketMessage(result);
+                        } catch (error) {
+                            console.error('Error parsing WebSocket message:', error);
+                        }
+                    };
+                    
+                    this.ws.onclose = () => {
+                        console.log('WebSocket disconnected');
+                        this.isConnected = false;
+                        this.isStreaming = false;
+                        this.updateUI();
+                        this.addResult('❌ Disconnected from server', 'error');
+                    };
+                    
+                    this.ws.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        this.addResult('❌ Connection failed. Check server IP and ensure server is running.', 'error');
+                        this.updateStatus('disconnected', '📵 Connection Failed');
+                    };
+                    
+                } catch (error) {
+                    console.error('Failed to connect WebSocket:', error);
+                    this.addResult('❌ Invalid server address or connection failed', 'error');
+                    this.updateStatus('disconnected', '📵 Connection Failed');
+                }
+            }
+            
+            handleWebSocketMessage(result) {
+                console.log('Received:', result);
+                
+                switch (result.type) {
+                    case 'streaming_started':
+                        this.isStreaming = true;
+                        this.updateUI();
+                        this.addResult('▶️ Face recognition streaming started', 'info');
+                        break;
+                        
+                    case 'streaming_stopped':
+                        this.isStreaming = false;
+                        this.updateUI();
+                        this.addResult('⏹️ Streaming stopped', 'info');
+                        break;
+                        
+                    case 'recognition_result':
+                        this.handleRecognitionResult(result);
+                        break;
+                        
+                    case 'attendance_marked':
+                        // Vibrate for attendance success
+                        if (navigator.vibrate) {
+                            navigator.vibrate([200, 100, 200, 100, 200]);
+                        }
+                        this.addResult(`🎉 Attendance marked for ${result.user?.name}!`, 'attendance-success');
+                        break;
+                        
+                    case 'attendance_error':
+                        this.addResult(`❌ Attendance error: ${result.message}`, 'error');
+                        break;
+                        
+                    case 'error':
+                        this.addResult(`❌ ${result.message}`, 'error');
+                        break;
+                }
+            }
+            
+            handleRecognitionResult(result) {
+                const data = result.data;
+                
+                if (data.faces_detected > 0) {
+                    // Light vibration for face detection
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                    
+                    let message = `👤 ${data.faces_detected} face(s) detected`;
+                    
+                    if (data.recognized_faces && data.recognized_faces.length > 0) {
+                        data.recognized_faces.forEach(face => {
+                            if (face.name !== 'Unknown') {
+                                message += `\\n✅ ${face.name} (${(face.confidence * 100).toFixed(1)}% confidence)`;
+                            } else {
+                                message += `\\n❓ Unknown person detected`;
+                            }
+                        });
+                    }
+                    
+                    this.addResult(message, 'info');
+                }
+            }
+            
+            async startCamera() {
+                try {
+                    // Stop existing stream
+                    if (this.currentStream) {
+                        this.currentStream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    const constraints = {
+                        video: {
+                            width: { ideal: 640, max: 1280 },
+                            height: { ideal: 480, max: 720 },
+                            facingMode: this.facingMode
+                        }
+                    };
+                    
+                    this.currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.elements.video.srcObject = this.currentStream;
+                    
+                    this.addResult(`📷 Camera started (${this.facingMode === 'user' ? 'Front' : 'Back'} camera)`, 'success');
+                    this.elements.cameraControls.style.display = 'flex';
+                    this.updateUI();
+                    
+                    // Vibrate for camera start
+                    if (navigator.vibrate) {
+                        navigator.vibrate(100);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    this.addResult('❌ Camera access failed. Please allow camera permissions in browser settings.', 'error');
+                    this.showCameraHelp();
+                }
+            }
+            
+            async switchCamera() {
+                this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+                await this.startCamera();
+            }
+            
+            toggleFlash() {
+                // Flash functionality (if supported)
+                if (this.currentStream) {
+                    const track = this.currentStream.getVideoTracks()[0];
+                    if (track && track.getCapabilities && track.getCapabilities().torch) {
+                        const capabilities = track.getCapabilities();
+                        if (capabilities.torch) {
+                            track.applyConstraints({
+                                advanced: [{ torch: !this.flashOn }]
+                            });
+                            this.flashOn = !this.flashOn;
+                            this.addResult(`💡 Flash ${this.flashOn ? 'ON' : 'OFF'}`, 'info');
+                        }
+                    } else {
+                        this.addResult('💡 Flash not supported on this device', 'info');
+                    }
+                }
+            }
+            
+            startStreaming() {
+                if (!this.isConnected || !this.currentStream) {
+                    this.addResult('❌ Connect to server and start camera first', 'error');
+                    return;
+                }
+                
+                // Send start streaming message
+                this.ws.send(JSON.stringify({ type: 'start_streaming' }));
+                
+                // Start sending frames every 150ms (6-7 FPS for mobile efficiency)
+                this.streamInterval = setInterval(() => {
+                    this.captureAndSendFrame();
+                }, 150);
+                
+                this.elements.streamingIndicator.style.display = 'block';
+                this.requestWakeLock();
+            }
+            
+            stopStreaming() {
+                if (this.streamInterval) {
+                    clearInterval(this.streamInterval);
+                    this.streamInterval = null;
+                }
+                
+                if (this.ws && this.isConnected) {
+                    this.ws.send(JSON.stringify({ type: 'stop_streaming' }));
+                }
+                
+                this.isStreaming = false;
+                this.elements.streamingIndicator.style.display = 'none';
+                this.updateUI();
+                this.releaseWakeLock();
+            }
+            
+            captureAndSendFrame() {
+                if (!this.currentStream || !this.isConnected || !this.elements.video.videoWidth) return;
+                
+                const ctx = this.elements.canvas.getContext('2d');
+                this.elements.canvas.width = this.elements.video.videoWidth;
+                this.elements.canvas.height = this.elements.video.videoHeight;
+                
+                ctx.drawImage(this.elements.video, 0, 0, this.elements.canvas.width, this.elements.canvas.height);
+                
+                const frameData = this.elements.canvas.toDataURL('image/jpeg', 0.7);
+                
+                if (this.ws && this.isConnected) {
+                    this.ws.send(JSON.stringify({
+                        type: 'video_frame',
+                        data: frameData
+                    }));
+                }
+            }
+            
+            addResult(message, type) {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result-item result-${type}`;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                resultDiv.innerHTML = `
+                    <small style="color: #6c757d;">${timestamp}</small><br>
+                    ${message.replace(/\\n/g, '<br>')}
+                `;
+                
+                // Clear "no results" message
+                if (this.elements.results.querySelector('.no-results')) {
+                    this.elements.results.innerHTML = '';
+                }
+                
+                this.elements.results.insertBefore(resultDiv, this.elements.results.firstChild);
+                
+                // Keep only last 10 results for mobile performance
+                while (this.elements.results.children.length > 10) {
+                    this.elements.results.removeChild(this.elements.results.lastChild);
+                }
+            }
+            
+            updateStatus(status, message) {
+                this.elements.connectionStatus.className = `status ${status}`;
+                this.elements.connectionStatus.textContent = message;
+            }
+            
+            updateUI() {
+                this.elements.connectBtn.disabled = this.isConnected;
+                this.elements.startCameraBtn.disabled = !this.isConnected;
+                this.elements.startStreamBtn.disabled = !this.isConnected || !this.currentStream || this.isStreaming;
+                this.elements.stopStreamBtn.disabled = !this.isStreaming;
+                
+                this.updateStatus(
+                    this.isConnected ? 'connected' : 'disconnected',
+                    `${this.isConnected ? '📡' : '📵'} ${this.isConnected ? 'Connected to HORUS' : 'Disconnected'}`
+                );
+                
+                // Adjust grid layout
+                if (this.isStreaming) {
+                    this.elements.controlsGrid.className = 'controls streaming';
+                } else {
+                    this.elements.controlsGrid.className = 'controls';
+                }
+            }
+            
+            showCameraHelp() {
+                const helpText = `
+                📱 Camera Access Help:
+                
+                Android Chrome: Address bar → 🔒 → Permissions → Camera → Allow
+                iPhone Safari: Settings → Safari → Camera → Allow
+                iPhone Chrome: Settings → Chrome → Camera → Allow
+                
+                Then refresh this page and try again.
+                `;
+                this.addResult(helpText, 'info');
+            }
+            
+            async requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        this.wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('Screen wake lock acquired');
+                    }
+                } catch (err) {
+                    console.log('Wake lock failed:', err);
+                }
+            }
+            
+            releaseWakeLock() {
+                if (this.wakeLock) {
+                    this.wakeLock.release();
+                    this.wakeLock = null;
+                }
+            }
+            
+            handleVisibilityChange() {
+                if (this.wakeLock !== null && document.visibilityState === 'visible') {
+                    this.requestWakeLock();
+                }
+            }
+            
+            cleanup() {
+                this.stopStreaming();
+                if (this.currentStream) {
+                    this.currentStream.getTracks().forEach(track => track.stop());
+                }
+                if (this.ws) {
+                    this.ws.close();
+                }
+                this.releaseWakeLock();
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MobileAttendanceSystem();
+        });
+    </script>
+</body>
+</html>
