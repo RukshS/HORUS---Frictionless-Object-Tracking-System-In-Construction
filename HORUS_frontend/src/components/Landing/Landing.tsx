@@ -5,6 +5,7 @@ import Footer from './Footer.tsx';
 import Contact from './Contact.tsx';
 import HowThisWorks from './HowThisWorks.tsx';
 import Functionality from './Functionality.tsx';
+import ChatBot from '../Chatbot/ChatBot.tsx';
 
 interface LandingProps {
   isAuthenticated: boolean;
@@ -28,6 +29,8 @@ const Landing: React.FC<LandingProps> = ({
         <Contact />
       </main>
       <Footer />
+      {/* ChatBot that hovers on top of everything */}
+      <ChatBot />
     </div>
   );
 };

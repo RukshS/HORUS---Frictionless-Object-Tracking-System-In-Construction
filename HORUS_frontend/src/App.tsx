@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import Landing from './components/Landing/Landing'; // Import the LandingPage
 import UserDashboard from './components/Dashboard/UserDashboard'; // Import the UserDashboard
+import ChatBot from './components/Chatbot/ChatBot'; // Import the ChatBot
 import AuthService from './services/AuthService2'; // Import AuthService
 
 function App() {
@@ -28,6 +29,9 @@ function App() {
           onAuthStateChange={handleAuthStateChange}
         />
       )}
+      
+      {/* ChatBot component that hovers on top of everything */}
+      <ChatBot />
     </>
   );
 }
