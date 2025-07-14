@@ -1,0 +1,96 @@
+🔍 Introduction
+HORUS is an AI-powered computer vision and tracking system designed to address the efficiency, safety, and quality challenges in modern manufacturing and warehousing. It integrates technologies like:
+
+Computer Vision
+
+Virtual RFID Simulation
+
+Web-Based Interface
+
+🎯 Purpose
+To provide real-time object detection, tracking, and analysis, improving:
+
+Operational Efficiency
+
+Workplace Safety
+
+Resource Management
+
+❗ Why HORUS?
+Manual methods in industries lead to:
+
+Asset misplacement
+
+Equipment malfunction detection delays
+
+Poor safety compliance
+
+Lack of real-time data
+
+Product quality inconsistencies
+
+HORUS solves these with automation and intelligence.
+
+🧠 Core Technologies
+Object Detection: YOLOv8/v11
+
+Tracking: DeepSORT, FairMOT
+
+Vision Frameworks: OpenCV, TensorFlow, Segment Anything Model (SAM2)
+
+Interface: Next.js (React), FastAPI
+
+Storage: MongoDB GridFS, AWS S3, Atlas
+
+NLP Support: Chatbot + Semantic Search
+
+Scalability: Built for many cameras, assets, and users
+
+🧩 System Modules
+Asset Tracking Module
+
+Computer vision + virtual RFID
+
+Shows positions on top-down map
+
+Workforce Safety Monitoring
+
+Detects PPE usage
+
+Identifies unsafe behavior
+
+Production Line Monitoring
+
+Detects bottlenecks, malfunctions
+
+Notifies deviations from optimal parameters
+
+Quality Control
+
+Detects defects during manufacturing
+
+Reduces waste, increases consistency
+
+📊 Dashboard & Features
+Real-time interactive dashboard
+
+Upload video or stream for tracking
+
+Configurable views (based on use case)
+
+Timed logs and alerts
+
+Multi-role access control
+
+Report generation
+
+🔎 Notable Features
+Web Interface: Intuitive, customizable
+
+Semantic Search: Find modules with natural queries
+
+Modular Architecture: Use only needed modules
+
+AI Chatbot: NLP-based help system
+
+Cloud/Local Compatibility: GridFS / S3 support
