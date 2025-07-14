@@ -5,7 +5,8 @@ from contextlib import asynccontextmanager
 from app.database import init_db
 import app.api.routes.auth as auth
 import app.api.routes.face_recognition as face_recognition
-import app.api.routes.websocket as websocket
+import HORUS_backend.app.api.websockets.websocket as websocket
+from app.chatagent.main import app as chatagent_app
 
 
 # Define lifespan context manager
@@ -50,6 +51,9 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(face_recognition.router)
 app.include_router(websocket.router)
+
+# Mount the chatagent sub-application
+app.mount("/chatagent", chatagent_app)
 
 @app.get("/")
 async def root():
