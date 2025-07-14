@@ -1,0 +1,76 @@
+/* Chatbot specific styles to ensure it hovers on top while scrolling */
+
+/* Ensure the chatbot container doesn't interfere with page scroll */
+.chatbot-container {
+  position: fixed !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+}
+
+.chatbot-container > * {
+  pointer-events: auto !important;
+}
+
+/* Smooth animations for the chatbot */
+.chatbot-button {
+  transform-origin: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chatbot-popup {
+  animation: slideInFromBottom 0.3s ease-out;
+  transform-origin: bottom right;
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Ensure scrolling doesn't affect the chatbot position */
+html, body {
+  scroll-behavior: smooth;
+}
+
+/* Backdrop blur support for older browsers */
+.chatbot-backdrop {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Custom scrollbar for chat messages */
+.chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Ensure chatbot works well on mobile */
+@media (max-width: 768px) {
+  .chatbot-popup {
+    width: calc(100vw - 1rem) !important;
+    height: calc(100vh - 6rem) !important;
+    bottom: 1rem !important;
+    right: 0.5rem !important;
+    left: 0.5rem !important;
+    max-width: none !important;
+  }
+}
