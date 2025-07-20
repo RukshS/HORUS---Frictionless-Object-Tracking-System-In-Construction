@@ -137,21 +137,109 @@ def process_frame(frame, camera_id):
 shared_detections = {}
 detection_lock = threading.Lock()
 
+# Violation tracking system
+violation_history = {}  # Track violations per person per camera
+violation_lock = threading.Lock()
+VIOLATION_CONFIRMATION_FRAMES = 10  # Number of consecutive frames to confirm violation
+VIOLATION_THRESHOLD = 0.9  # 90% of frames must show violation to confirm
+
 # Frame processing queues for parallel processing
 frame_queues = {1: queue.Queue(maxsize=3), 2: queue.Queue(maxsize=3), 3: queue.Queue(maxsize=3)}
 processed_queues = {1: queue.Queue(maxsize=3), 2: queue.Queue(maxsize=3), 3: queue.Queue(maxsize=3)}
 
-def log_detection_async(timestamp, camera_id, person_id, person_name, class_name, similarity):
-    """Asynchronously log detection to MongoDB"""
+def is_violation(class_name):
+    """Check if a class represents a safety violation"""
+    violation_classes = ['without_helmet', 'without_vest']
+    return class_name in violation_classes
+
+def update_violation_history(person_id, camera_id, class_name, person_name):
+    """Update violation history for a person and determine if violation should be logged"""
+    with violation_lock:
+        # Create unique key for person-camera combination
+        key = f"{person_id}_{camera_id}"
+        
+        # Initialize history if not exists
+        if key not in violation_history:
+            violation_history[key] = {
+                "frames": [],
+                "person_name": person_name,
+                "camera_id": camera_id,
+                "person_id": person_id,
+                "last_logged_violation": None
+            }
+        
+        # Add current frame result
+        violation_history[key]["frames"].append({
+            "class_name": class_name,
+            "is_violation": is_violation(class_name),
+            "timestamp": datetime.now()
+        })
+        
+        # Keep only recent frames (sliding window)
+        violation_history[key]["frames"] = violation_history[key]["frames"][-VIOLATION_CONFIRMATION_FRAMES:]
+        
+        # Check if we have enough frames to make a decision
+        if len(violation_history[key]["frames"]) >= VIOLATION_CONFIRMATION_FRAMES:
+            violation_count = sum(1 for frame in violation_history[key]["frames"] if frame["is_violation"])
+            violation_ratio = violation_count / len(violation_history[key]["frames"])
+            
+            # If violation threshold is met and we haven't logged this violation recently
+            if violation_ratio >= VIOLATION_THRESHOLD:
+                last_logged = violation_history[key]["last_logged_violation"]
+                current_time = datetime.now()
+                
+                # Only log if we haven't logged a violation for this person in the last 30 seconds
+                if last_logged is None or (current_time - last_logged).total_seconds() > 30:
+                    violation_history[key]["last_logged_violation"] = current_time
+                    
+                    # Get the most common violation type in recent frames
+                    violation_types = [frame["class_name"] for frame in violation_history[key]["frames"] if frame["is_violation"]]
+                    if violation_types:
+                        most_common_violation = max(set(violation_types), key=violation_types.count)
+                        return True, most_common_violation
+        
+        return False, class_name
+
+def cleanup_violation_history():
+    """Cleanup old violation history entries"""
+    with violation_lock:
+        current_time = datetime.now()
+        to_remove = []
+        
+        for key, history in violation_history.items():
+            # Remove entries older than 30 seconds with no recent activity
+            if history["frames"]:
+                last_activity = max(frame["timestamp"] for frame in history["frames"])
+                if (current_time - last_activity).total_seconds() > 30:
+                    to_remove.append(key)
+        
+        for key in to_remove:
+            del violation_history[key]
+
+def log_detection_async(timestamp, camera_id, person_id, person_name, class_name, similarity, is_confirmed_violation=False):
+    """Asynchronously log detection to MongoDB with violation status"""
     try:
-        collection.insert_one({
+        document = {
             "timestamp": timestamp,
             "camera_id": int(camera_id),
             "person_id": int(person_id),
             "person_name": str(person_name),
             "class_name": str(class_name),
-            "similarity": float(similarity)
-        })
+            "similarity": float(similarity),
+            "is_violation": is_violation(class_name),
+            "is_confirmed_violation": is_confirmed_violation,
+            "violation_severity": "HIGH" if is_confirmed_violation else ("MEDIUM" if is_violation(class_name) else "NONE")
+        }
+        
+        # Use different collections for violations vs regular detections
+        if is_confirmed_violation:
+            violations_collection = db["confirmed_violations"]
+            violations_collection.insert_one(document)
+            logger.warning(f"CONFIRMED VIOLATION: {person_name} - {class_name} at Camera {camera_id}")
+        
+        # Always log to main detections collection
+        collection.insert_one(document)
+        
     except Exception as e:
         logger.error(f"Error logging to MongoDB: {e}")
 
@@ -219,18 +307,56 @@ def process_frame_parallel(frame, camera_id):
                     "bbox": (x1, y1, x2, y2)
                 }
 
+            # Check violation with validation logic
+            should_log_violation, confirmed_class = update_violation_history(
+                track_id, camera_id, class_name, best_match_name
+            )
+
             person_id = track_id
-            label = f"ID: {person_id} ({best_match_name}, {class_name})"
-            color = (0, 255, 0) if best_match_name != "Unknown" else (0, 0, 255)
+            
+            # Enhanced color coding and labeling
+            if should_log_violation and is_violation(confirmed_class):
+                color = (0, 0, 255)  # Red for confirmed violation
+                label = f"ID: {person_id} ({best_match_name}, VIOLATION: {confirmed_class})"
+                
+                # Log confirmed violation to MongoDB
+                threading.Thread(target=log_detection_async, args=(
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    camera_id, person_id, best_match_name, confirmed_class, best_similarity, True  # True indicates confirmed violation
+                ), daemon=True).start()
+                
+            elif is_violation(class_name):
+                # Check how many violation frames we have so far
+                with violation_lock:
+                    key = f"{track_id}_{camera_id}"
+                    if key in violation_history and len(violation_history[key]["frames"]) > 0:
+                        recent_violations = sum(1 for frame in violation_history[key]["frames"] if frame["is_violation"])
+                        total_frames = len(violation_history[key]["frames"])
+                        violation_ratio = recent_violations / total_frames
+                        
+                        if violation_ratio >= 0.5:  # Show orange if over 50% violation rate
+                            color = (0, 165, 255)  # Orange for potential violation
+                            label = f"ID: {person_id} ({best_match_name}, CHECKING: {class_name} [{recent_violations}/{total_frames}])"
+                        else:
+                            color = (0, 255, 255)  # Yellow for minor concern
+                            label = f"ID: {person_id} ({best_match_name}, {class_name})"
+                    else:
+                        color = (0, 255, 255)  # Yellow for first-time detection
+                        label = f"ID: {person_id} ({best_match_name}, {class_name})"
+            else:
+                color = (0, 255, 0)  # Green for safe/compliant
+                label = f"ID: {person_id} ({best_match_name}, {class_name})"
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
-            # Log to MongoDB asynchronously
-            threading.Thread(target=log_detection_async, args=(
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                camera_id, person_id, best_match_name, class_name, best_similarity
-            ), daemon=True).start()
+            # Only log NON-VIOLATION detections for tracking purposes
+            # Violations are ONLY logged when confirmed (red boxes) - handled above
+            if not should_log_violation and not is_violation(class_name):  # Only log safe detections
+                threading.Thread(target=log_detection_async, args=(
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    camera_id, person_id, best_match_name, class_name, best_similarity, False  # False indicates regular detection
+                ), daemon=True).start()
 
         return frame
     
@@ -361,6 +487,51 @@ def get_cross_camera_detections():
         
         return recent_detections
 
+def get_violation_status():
+    """Get current violation status and history"""
+    with violation_lock:
+        current_time = datetime.now()
+        active_violations = {}
+        
+        for key, history in violation_history.items():
+            if history["frames"]:
+                # Check if currently in violation state
+                recent_frames = [f for f in history["frames"] if (current_time - f["timestamp"]).total_seconds() < 5]
+                if recent_frames:
+                    violation_count = sum(1 for frame in recent_frames if frame["is_violation"])
+                    if violation_count > 0:
+                        active_violations[key] = {
+                            "person_name": history["person_name"],
+                            "camera_id": history["camera_id"],
+                            "person_id": history["person_id"],
+                            "violation_ratio": violation_count / len(recent_frames),
+                            "frames_checked": len(recent_frames),
+                            "is_confirmed": violation_count / len(recent_frames) >= VIOLATION_THRESHOLD,
+                            "last_violation_time": max(f["timestamp"] for f in recent_frames if f["is_violation"]).isoformat() if any(f["is_violation"] for f in recent_frames) else None
+                        }
+        
+        return {
+            "active_violations": active_violations,
+            "violation_threshold": VIOLATION_THRESHOLD,
+            "confirmation_frames": VIOLATION_CONFIRMATION_FRAMES,
+            "total_tracked_persons": len(violation_history)
+        }
+
+def get_confirmed_violations_from_db(limit=50):
+    """Get recent confirmed violations from database"""
+    try:
+        violations_collection = db["confirmed_violations"]
+        recent_violations = list(violations_collection.find().sort("timestamp", -1).limit(limit))
+        
+        # Convert ObjectId to string for JSON serialization
+        for violation in recent_violations:
+            violation["_id"] = str(violation["_id"])
+        
+        return recent_violations
+    except Exception as e:
+        logger.error(f"Error fetching violations from database: {e}")
+        return []
+
 def cleanup_old_detections():
     """Cleanup old detections from shared memory"""
     with detection_lock:
@@ -381,6 +552,7 @@ def start_cleanup_thread():
     def cleanup_loop():
         while True:
             cleanup_old_detections()
+            cleanup_violation_history()  # Also cleanup violation history
             time.sleep(5)  # Run cleanup every 5 seconds
     
     cleanup_thread = threading.Thread(target=cleanup_loop, daemon=True)

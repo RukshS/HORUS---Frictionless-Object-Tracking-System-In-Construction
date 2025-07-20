@@ -1,10 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 from app.detection.yolo_reid_stream import (
     generate_camera1_frames, 
     generate_camera2_frames, 
     generate_camera3_frames,
     get_cross_camera_detections,
+    get_violation_status,
+    get_confirmed_violations_from_db,
     stop_all_processing
 )
 
@@ -41,6 +43,26 @@ def get_cross_camera_data():
         "status": "success",
         "detections": get_cross_camera_detections(),
         "message": "Recent detections from all cameras"
+    }
+
+@router.get("/violation_status")
+def get_current_violations():
+    """Get current violation status with validation logic"""
+    return {
+        "status": "success",
+        "data": get_violation_status(),
+        "message": "Current violation status with frame validation"
+    }
+
+@router.get("/confirmed_violations")
+def get_confirmed_violations(limit: int = Query(50, ge=1, le=200)):
+    """Get confirmed violations from database"""
+    violations = get_confirmed_violations_from_db(limit)
+    return {
+        "status": "success",
+        "violations": violations,
+        "count": len(violations),
+        "message": f"Retrieved {len(violations)} confirmed violations"
     }
 
 @router.post("/stop_processing")
