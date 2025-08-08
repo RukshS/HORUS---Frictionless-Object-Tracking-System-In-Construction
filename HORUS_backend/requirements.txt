@@ -1,5 +1,7 @@
+absl-py==2.3.1
 annotated-types==0.7.0
 anyio==4.7.0
+appnope==0.1.4
 argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
 arrow==1.3.0
@@ -31,6 +33,7 @@ contourpy==1.3.1
 cookiecutter==2.6.0
 cryptography==44.0.3
 cycler==0.12.1
+Cython==3.1.2
 debugpy==1.8.9
 decorator==5.1.1
 defusedxml==0.7.1
@@ -41,7 +44,15 @@ dotenv==0.9.9
 durationpy==0.10
 ecdsa==0.19.1
 email_validator==2.2.0
+exceptiongroup==1.3.0
 executing==2.1.0
+fastapi-cli==0.0.8
+fastapi-cloud-cli==0.1.2
+filterpy==1.4.5
+flake8==7.3.0
+future==1.0.0
+gdown==5.2.0
+git-filter-repo==2.47.0
 face-recognition==1.3.0
 face_recognition_models==0.3.0
 fastapi==0.115.6
@@ -61,6 +72,7 @@ googleapis-common-protos==1.70.0
 grpcio==1.73.1
 grpcio-status==1.71.2
 h11==0.14.0
+h5py==3.14.0
 httpcore==1.0.7
 httplib2==0.22.0
 httptools==0.6.4
@@ -68,12 +80,16 @@ httpx==0.28.1
 huggingface-hub==0.33.2
 humanfriendly==10.0
 idna==3.10
+
+imageio==2.37.0
 importlib_metadata==8.7.0
 importlib_resources==6.5.2
 ipykernel==6.29.5
 ipython==8.30.0
 ipywidgets==8.1.5
 isoduration==20.11.0
+isort==4.3.21
+itsdangerous==2.2.0
 jedi==0.19.2
 Jinja2==3.1.4
 jiter==0.10.0
@@ -93,12 +109,16 @@ jupyterlab_pygments==0.3.0
 jupyterlab_server==2.27.3
 jupyterlab_widgets==3.0.13
 kiwisolver==1.4.7
+lap==0.5.12
 kubernetes==33.1.0
 lazy-model==0.2.0
+lazy_loader==0.4
+Markdown==3.8.2
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 matplotlib==3.9.3
 matplotlib-inline==0.1.7
+mccabe==0.7.0
 mdurl==0.1.2
 mistune==3.0.2
 mmh3==5.1.0
@@ -108,6 +128,10 @@ nbclient==0.10.1
 nbconvert==7.16.4
 nbformat==5.10.4
 nest-asyncio==1.6.0
+networkx==3.4.2
+notebook_shim==0.2.4
+numpy==2.1.3
+opencv-python==4.12.0.88
 networkx==3.5
 notebook_shim==0.2.4
 numpy==2.1.3
@@ -130,6 +154,7 @@ parso==0.8.4
 passlib==1.7.4
 pathlib2==2.3.7.post1
 patsy==1.0.1
+pexpect==4.9.0
 pillow==11.0.0
 pillow_heif==0.22.0
 platformdirs==4.3.6
@@ -140,17 +165,24 @@ prompt_toolkit==3.0.48
 proto-plus==1.26.1
 protobuf==5.29.5
 psutil==6.1.0
+ptyprocess==0.7.0
 pure_eval==0.2.3
+py-cpuinfo==9.0.0
 pyasn1==0.4.8
+pycodestyle==2.14.0
 pyasn1_modules==0.4.2
 PyAudio==0.2.14
 pybase64==1.4.1
 pycparser==2.22
 pydantic==2.11.4
+pydantic-extra-types==2.10.5
+pydantic-settings==2.10.1
 pydantic_core==2.33.2
+pyflakes==3.4.0
 Pygments==2.18.0
 pymongo==4.13.0
 pyparsing==3.2.0
+PySocks==1.7.1
 PyPDF2==3.0.1
 PyPika==0.48.9
 pypiwin32==223
@@ -164,8 +196,6 @@ python-multipart==0.0.20
 python-slugify==8.0.4
 pyttsx3==2.99
 pytz==2025.2
-pywin32==308
-pywinpty==2.0.14
 PyYAML==6.0.2
 pyzmq==26.2.0
 referencing==0.35.1
@@ -175,8 +205,11 @@ requests-oauthlib==2.0.0
 rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rich==13.9.4
+rich-toolkit==0.14.8
+rignore==0.5.1
 rpds-py==0.22.3
 rsa==4.9.1
+scikit-image==0.25.2
 safetensors==0.5.3
 scikit-learn==1.7.0
 scipy==1.15.3
@@ -196,6 +229,10 @@ standard-chunk==3.13.0
 starlette==0.41.3
 statsmodels==0.14.4
 sympy==1.14.0
+tb-nightly==2.20.0a20250710
+tensorboard==2.19.0
+tensorboard-data-server==0.7.2
+tifffile==2025.5.10
 tenacity==9.1.2
 terminado==0.18.1
 text-unidecode==1.3
@@ -203,7 +240,9 @@ threadpoolctl==3.6.0
 tinycss2==1.4.0
 tokenizers==0.21.2
 toml==0.10.2
+tomli==2.2.1
 torch==2.7.1
+torchvision==0.22.1
 tornado==6.4.2
 tqdm==4.67.1
 traitlets==5.14.3
@@ -213,19 +252,49 @@ types-python-dateutil==2.9.0.20241206
 typing-inspection==0.4.0
 typing_extensions==4.13.2
 tzdata==2025.2
+ujson==5.10.0
+ultralytics==8.3.163
+ultralytics-thop==2.0.14
 uri-template==1.3.0
 uritemplate==4.2.0
 urllib3==2.2.3
 uvicorn==0.34.2
+uvloop==0.21.0
 watchfiles==1.0.5
 wcwidth==0.2.13
 webcolors==24.11.1
 webencodings==0.5.1
 websocket-client==1.8.0
 websockets==15.0.1
+Werkzeug==3.1.3
 wheel==0.45.1
 widgetsnbextension==4.0.13
+yacs==0.1.8
 yapf==0.43.0
+numpy
+Cython
+h5py
+Pillow
+six
+scipy
+opencv-python
+matplotlib
+tb-nightly
+future
+yacs
+gdown
+flake8
+yapf
+isort==4.3.21
+imageio
+chardet
+# Export --------------------------------------
+# onnx
+# onnx-simplified
+# openvino-dev
+# openvino2tensorflow
+# tensorflow
+# tensorflow_datasets
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-huggingface==0.0.3

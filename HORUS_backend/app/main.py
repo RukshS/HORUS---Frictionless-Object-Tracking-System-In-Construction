@@ -4,6 +4,8 @@ from fastapi.security import OAuth2PasswordBearer
 from contextlib import asynccontextmanager
 from app.database import init_db
 import app.api.routes.auth as auth
+from app.api.routes.detection import router as detection_router
+from app.api.routes.stream import router as stream_router
 import app.api.routes.face_recognition as face_recognition
 import HORUS_backend.app.api.websockets.websocket as websocket
 from app.chatagent.main import app as chatagent_app
@@ -59,4 +61,7 @@ app.mount("/chatagent", chatagent_app)
 async def root():
     return {"message": "Welcome to Horus!"}
 
+
+app.include_router(detection_router, prefix="/api", tags=["Detection"])
+app.include_router(stream_router, prefix="/api", tags=["Stream"])
 

@@ -199,3 +199,6 @@ build/
 # Test coverage
 coverage/
 .nyc_output/
+
+# Video files
+HORUS_backend/app/videos/
