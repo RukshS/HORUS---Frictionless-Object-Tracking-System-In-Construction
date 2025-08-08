@@ -6,6 +6,9 @@ from app.database import init_db
 import app.api.routes.auth as auth
 from app.api.routes.detection import router as detection_router
 from app.api.routes.stream import router as stream_router
+import app.api.routes.face_recognition as face_recognition
+import HORUS_backend.app.api.websockets.websocket as websocket
+from app.chatagent.main import app as chatagent_app
 
 
 # Define lifespan context manager
@@ -28,11 +31,15 @@ app = FastAPI(title="Horus API",
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/signin")
 
 # CORS (Cross-Origin Resource Sharing)
-# Adjust origins as needed for your frontend URL
+# Allow mobile and local network access
 origins = [
-    "http://localhost:5173", # Assuming Vite dev server runs here
+    "http://localhost:5173", # Vite dev server
     "http://127.0.0.1:5173",
-    # Add your production frontend URL here
+    "http://localhost:3000", # Mobile server
+    "http://127.0.0.1:3000",
+    "http://192.168.*.*:*",  # Local network access for mobile
+    "http://10.*.*.*:*",     # Private network access
+    "*"  # For development - remove in production
 ]
 
 app.add_middleware(
@@ -44,14 +51,17 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(face_recognition.router)
+app.include_router(websocket.router)
+
+# Mount the chatagent sub-application
+app.mount("/chatagent", chatagent_app)
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to Horus!"}
 
-# To run this app (from the HORUS_Signup directory):
-# uvicorn backend.main:app --reload --port 8000
-
 
 app.include_router(detection_router, prefix="/api", tags=["Detection"])
 app.include_router(stream_router, prefix="/api", tags=["Stream"])
+

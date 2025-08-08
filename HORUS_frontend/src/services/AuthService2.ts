@@ -1,6 +1,6 @@
-import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
+import { jwtDecode } from 'jwt-decode';
 
-// Define the base URL for your FastAPI backend
+// Authentication base URL for your FastAPI backend
 const API_BASE_URL = 'http://localhost:8000/api/auth'; // Adjust if your backend runs elsewhere
 
 interface DecodedToken {

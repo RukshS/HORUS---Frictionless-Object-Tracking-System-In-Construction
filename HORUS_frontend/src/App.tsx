@@ -7,7 +7,7 @@ import Landing from './components/Landing/Landing';
 import UserDashboard from './components/Dashboard/UserDashboard';
 import LiveDetectionPage from './components/LiveDetectionPage/LiveDetectionPage';
 import AuthService from './services/AuthService2';
-
+import ChatBot from './components/Chatbot/ChatBot';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(AuthService.isAuthenticated());
@@ -60,6 +60,11 @@ function App() {
          
       </Routes>
     </Router>
+      )}
+      
+      {/* ChatBot component that hovers on top of everything */}
+      <ChatBot />
+    </>
   );
 }
 
